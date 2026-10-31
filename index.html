@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amanecer"><meta name="theme-color" content="#14102b">
+<title>Amanecer</title>
+<style>
+:root{--a:#ffb347;--b:#14102b;--s:#241c4a;--t:#f4f0ff;--m:#a79fd0;--ok:#5eead4}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--b);color:var(--t);font:16px/1.4 ui-rounded,system-ui,-apple-system,sans-serif;padding-top:env(safe-area-inset-top)}
+#v{padding:14px 16px calc(92px + env(safe-area-inset-bottom));max-width:560px;margin:auto}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--s);padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #ffffff18;z-index:5}
+nav button{flex:1;background:none;border:0;color:var(--m);font:inherit;font-size:11px;padding:4px 0}
+nav button b{display:block;font-size:22px;font-weight:400}nav .on{color:var(--a)}
+.c{background:var(--s);border-radius:20px;padding:14px;margin:10px 0}
+h2,h3{margin:10px 0 4px}h2{font-size:22px}
+.bar{height:12px;border-radius:9px;background:#ffffff1c;overflow:hidden}.bar i{display:block;height:100%;background:var(--a);transition:width .9s}
+.m{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;background:var(--s);border:2px solid transparent;border-radius:18px;color:var(--t);font:inherit;text-align:left;padding:10px 14px;margin:8px 0}
+.m.d{border-color:var(--ok)}.m>span{font-size:30px}small{color:var(--m)}.m small{display:block}
+.btn{display:block;background:var(--a);color:#1a1230;border:0;border-radius:16px;font:inherit;font-weight:700;padding:14px;width:100%;margin:6px 0;text-align:center}
+.btn.g{background:#ffffff1c;color:var(--t)}
+input,textarea,select{width:100%;background:#0003;color:var(--t);border:1px solid #ffffff30;border-radius:12px;padding:10px;font:inherit;margin:4px 0}
+.sh{position:fixed;inset:0;background:#000b;display:flex;align-items:flex-end;z-index:9}
+.sh>div{background:var(--b);border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow:auto}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.gr>div{background:var(--s);border-radius:14px;padding:8px;text-align:center;font-size:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.q{opacity:.35;filter:grayscale(1)}
+img.p{width:100%;border-radius:10px;aspect-ratio:1;object-fit:cover}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+#tt{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--a);color:#1a1230;padding:10px 16px;border-radius:14px;z-index:20;font-weight:700;max-width:90%;text-align:center}
+@keyframes z{from{opacity:0;transform:scale(.6)}}
+</style></head><body><div id="v"></div><nav id="n"></nav>
+<script>
+const $=s=>document.querySelector(s),dk=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')},
+ad=(k,n)=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()+n);return dk(d)},
+esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DF={f:10,m:25,h:50},DN={f:'Fácil',m:'Media',h:'Difícil'},EM=['😞','😕','😐','🙂','😄'];
+const SUR=['Llama a un amigo','Ordena tu cuarto 10 min','Toma el sol 10 min','Escribe 3 cosas buenas de hoy','Escucha tu canción favorita','Estírate 5 minutos','Respira hondo 2 minutos'];
+const H0=[['gym','Ejercicio','💪','m','Gym, correr, caminata o deporte en casa · mín. 30 min','10 min de movimiento','Mañana'],
+['eat','Comer bien','🥗','m','Desayuno, almuerzo y cena sanos, sin chatarra · mín. 6 vasos de agua','Una comida sana + 3 vasos de agua','Todo el día'],
+['out','Salir de casa','🌳','m','Caminar, café, plan, mandado o parque · mín. 20 min fuera','5 minutos afuera','Tarde'],
+['sleep','Dormir bien','😴','m','Anota hora de acostarte y despertar · meta 7 a 9 h','Acostarte 30 min antes','Noche'],
+['joy','Algo que me hace feliz','🎧','m','Hobby, música, juegos, amigos o aprender algo','10 min de lo que disfrutes','Tarde'],
+['mood','Registro de ánimo','🙂','f','¿Cómo te sentiste hoy?','','Noche'],
+['sur','Misión sorpresa','🎁','f','Pequeña y fácil, solo por hoy','','Cuando quieras']];
+let S=JSON.parse(localStorage.getItem('aq')||'null')||{start:'2026-11-12',hab:H0.map(a=>({id:a[0],n:a[1],i:a[2],d:a[3],x:a[4],mn:a[5],h:a[6],on:1})),log:{},sp:0,ex:0,own:['🦊','Amanecer'],av:'🦊',th:0,fx:0,snd:1,vib:1,ach:[],epic:{}};
+const sv=()=>localStorage.setItem('aq',JSON.stringify(S));
+let F=null,MD=0,DK='',cur=-1;
+const act=()=>S.hab.filter(h=>h.on),nm=h=>h.id=='sur'?SUR[[...dk()].reduce((a,c)=>a+c.charCodeAt(0),0)%SUR.length]:h.n;
+const dayXp=k=>{const d=S.log[k]||{};return Object.keys(d).reduce((a,h)=>a+(h=='_b'?d._b:d[h].xp),0)};
+const tot=()=>Object.keys(S.log).reduce((a,k)=>a+dayXp(k),0)+S.ex,coins=()=>Math.floor(tot()/5)-S.sp;
+const lv=x=>Math.min(100,Math.floor(Math.pow(x/25,2/3))+1),th=l=>Math.round(25*Math.pow(l-1,1.5));
+const RN=['Bronce','Plata','Oro','Platino','Diamante','Maestro','Leyenda'],RC=['#cd7f32','#c0c8d4','#ffd34d','#7fe3d6','#6ab7ff','#c77dff','#ff5d8f'],DV=['III','II','I'];
+const stp=l=>Math.min(20,Math.floor((l-1)/4.76)),rk=l=>RN[stp(l)/3|0]+' '+DV[stp(l)%3];
+function emb(l,z){const s=stp(l),r=s/3|0,n=r==6?10:r+3,p=[];for(let i=0;i<n;i++){const R=r==6&&i%2?24:48,a=i/n*6.283-1.571;p.push((50+R*Math.cos(a)).toFixed(1)+','+(50+R*Math.sin(a)).toFixed(1))}
+return `<svg width="${z}" height="${z}" viewBox="0 0 100 100"><polygon points="${p.join(' ')}" fill="${RC[r]}" stroke="#fff8" stroke-width="3"/><text x="50" y="59" text-anchor="middle" font-size="26" font-weight="800" fill="#1a1230">${DV[s%3]}</text></svg>`}
+const has=k=>S.log[k]&&Object.keys(S.log[k]).some(h=>h!='_b'),wk=k=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()-(d.getDay()+6)%7);return dk(d)};
+function stk(){const fd=Object.keys(S.log).filter(has).sort()[0];if(!fd)return 0;let k=dk(),n=0,u={};if(!has(k))k=ad(k,-1);for(;k>=fd;k=ad(k,-1)){if(has(k))n++;else{const w=wk(k);if(u[w])break;u[w]=1}}return n}
+const mu=s=>s>=30?2:s>=14?1.5:s>=7?1.25:s>=3?1.1:1;
+const ep=w=>{let n=0;for(let i=0;i<7;i++){const d=S.log[ad(w,i)];if(d&&d.gym)n++}return n};
+function epic(){const w=wk(dk());if(ep(w)>=4&&!S.epic[w]){S.epic[w]=1;S.ex+=100;toast('👑 ¡Misión épica completada! +100 XP')}}
+function bonus(k){const d=S.log[k],a=act();if(a.length&&a.every(h=>d[h.id]))d._b=50;else delete d._b}
+const IC={gym:'💪',eat:'🥗',out:'🌳',sleep:'😴',joy:'🎧',mood:'🙂',sur:'🎁',st:'🔥',lv:'⭐',pf:'💎',ph:'📸',early:'🌅',total:'🏅',epic:'👑'};
+const ACH=[['Primer paso','total',1],['Diez misiones','total',10],['50 misiones','total',50],['Centenario','total',100],['250 misiones','total',250],['Gym x1','gym',1],['Gym x10','gym',10],['Gym x25','gym',25],['Buen comer x10','eat',10],['Buen comer x25','eat',25],['Explorador','out',7],['Aventurero','out',20],['Dormilón x7','sleep',7],['Dormilón x21','sleep',21],['Feliz x7','joy',7],['Feliz x21','joy',21],['Ánimo x7','mood',7],['Ánimo x21','mood',21],['Sorpresa x5','sur',5],['Sorpresa x15','sur',15],['Racha de 3','st',3],['Primera semana','st',7],['Racha de 14','st',14],['Racha de 30','st',30],['Nivel 5','lv',5],['Nivel 10','lv',10],['Nivel 25','lv',25],['Nivel 50','lv',50],['Día perfecto','pf',1],['5 días perfectos','pf',5],['15 días perfectos','pf',15],['Fotógrafo','ph',10],['Álbum de 50','ph',50],['Madrugador','early',5],['Épico','epic',1]];
+function M(){const m={total:0,ph:0,early:0,pf:0,st:stk(),lv:lv(tot()),epic:Object.keys(S.epic).length};for(const k in S.log){const d=S.log[k];for(const h in d){if(h=='_b'){m.pf++;continue}const e=d[h];m.total++;m[h]=(m[h]||0)+1;if(e.pid)m.ph++;if(new Date(e.t).getHours()<8)m.early++}}return m}
+function chk(){const m=M();ACH.forEach(a=>{if(!S.ach.includes(a[0])&&(m[a[1]]||0)>=a[2]){S.ach.push(a[0]);S.ex+=20;toast('🏅 Logro: '+a[0]+' (+20 XP)')}})}
+function snd(f){if(!S.snd)return;try{const a=snd.a=snd.a||new(window.AudioContext||webkitAudioContext)(),t=a.currentTime;f.forEach((x,i)=>{const o=a.createOscillator(),g=a.createGain(),s=t+i*.14;o.frequency.value=x;g.gain.setValueAtTime(.001,s);g.gain.exponentialRampToValueAtTime(.15,s+.03);g.gain.exponentialRampToValueAtTime(.001,s+.4);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+.45)})}catch(e){}}
+function toast(t){const o=$('#tt');o&&o.remove();const e=document.createElement('div');e.id='tt';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2800)}
+function fx(){if(!S.fx)return;for(let i=0;i<18;i++){const s=document.createElement('span');s.textContent=['✨','🎉','⭐'][i%3];s.style.cssText=`position:fixed;z-index:30;left:${Math.random()*95}vw;top:-24px;font-size:22px;transition:transform 1.6s ease-in,opacity 1.6s;pointer-events:none`;document.body.append(s);setTimeout(()=>{s.style.transform=`translateY(${innerHeight}px)`;s.style.opacity=0},30);setTimeout(()=>s.remove(),1800)}}
+function rankUp(l){snd([392,523,659,784,1047]);const d=document.createElement('div');d.className='sh';d.style.alignItems='center';d.innerHTML=`<div style="background:none;text-align:center;animation:z .7s">${emb(l,190)}<h2>¡Subiste a ${rk(l)}!</h2><p>Lo lograste a tu ritmo 💛</p><button class="btn" style="width:auto;display:inline-block;padding:12px 34px">Seguir</button></div>`;d.onclick=()=>d.remove();document.body.append(d)}
+const cmp=async f=>{let i;try{i=await createImageBitmap(f)}catch(e){i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=no;m.src=URL.createObjectURL(f)})}
+const k=Math.min(1,1024/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.7)};
+function pick(i){F=i.files&&i.files[0]||null;$('#pk').innerHTML=F?`✅ Foto lista<br><img class="p" style="width:110px;margin-top:6px" src="${URL.createObjectURL(F)}">`:''}
+const db=new Promise((ok,no)=>{const r=indexedDB.open('aq',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>ok(r.result);r.onerror=no});
+const ix=(m,f)=>db.then(d=>new Promise((ok,no)=>{const q=f(d.transaction('p',m).objectStore('p'));q.onsuccess=()=>ok(q.result);q.onerror=no})),
+pg=k=>ix('readonly',s=>s.get(k)),pp=(k,v)=>ix('readwrite',s=>s.put(v,k)),pd=k=>ix('readwrite',s=>s.delete(k));
+function sheet(h){const d=document.createElement('div');d.className='sh';d.id='sh';d.onclick=e=>e.target==d&&close();d.innerHTML='<div>'+h+'</div>';document.body.append(d)}
+const close=()=>{const e=$('#sh');e&&e.remove()};
+function mis(id,k){DK=k||dk();const h=S.hab.find(x=>x.id==id),e=(S.log[DK]||{})[id];F=null;MD=e?e.mood:0;
+let b=`<h2>${h.i} ${nm(h)}</h2><p style="color:var(--m)">${esc(h.x)} · ${DN[h.d]} · ${h.h}</p>`;
+if(e)b+=`<div class="c">✅ ${new Date(e.t).toLocaleString('es',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${e.m?' · versión mini':''} · +${e.xp} XP ${e.mood?EM[e.mood-1]:''}<br>${esc(e.note)}<div id="pv"></div></div>`;
+if(id=='mood')b+=`<div class="row">${EM.map((m,i)=>`<button class="btn g" style="font-size:26px" onclick="MD=${i+1};[...this.parentNode.children].forEach(x=>x.style.outline='');this.style.outline='2px solid var(--a)'">${m}</button>`).join('')}</div>`;
+else b+=`<div class="row">${[['capture="environment"','📷 Cámara'],['','🖼️ Galería']].map(o=>`<div class="btn g" style="position:relative;overflow:hidden">${o[1]}<input type="file" accept="image/*" ${o[0]} onchange="pick(this)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;font-size:60px"></div>`).join('')}</div><div id="pk" style="color:var(--ok)"></div>`;
+b+=`<textarea id="nt" rows="3" placeholder="${id=='mood'?'Nota opcional':'O escribe una nota (mínimo 15 letras)'}"></textarea>`;
+b+=`<button class="btn" onclick="done('${id}',${e?e.m:0})">${e?'Reemplazar prueba':'Completar · +'+Math.round(DF[h.d]*mu(stk()))+' XP'}</button>`;
+if(!e&&h.mn)b+=`<button class="btn g" onclick="done('${id}',1)">Versión mini · +5 XP<br><small>${esc(h.mn)}</small></button>`;
+if(e)b+=`<button class="btn g" onclick="confirm('¿Borrar esta prueba? La misión volverá a pendiente.')&&del('${id}')">Borrar prueba</button>`;
+sheet(b);if(e&&e.pid)pg(e.pid).then(u=>$('#pv').innerHTML=`<img class="p" src="${u}">`)}
+async function done(id,mini){const h=S.hab.find(x=>x.id==id),k=DK,nt=($('#nt')||{}).value||'',old=(S.log[k]||{})[id];
+if(id=='mood'?!MD:(!F&&nt.trim().length<15))return toast(id=='mood'?'Elige cómo te sentiste':'Sube una foto o escribe una nota de 15+ letras');
+let pid;if(F){try{const u=await cmp(F);pid=k+id+Date.now();await pp(pid,u)}catch(e){pid=undefined;if(nt.trim().length<15)return toast('No pude leer esa foto. Prueba otra o escribe una nota')}}
+if(old&&old.pid)pd(old.pid);
+const x0=tot(),l0=lv(x0),xp=old?old.xp:Math.round((mini?5:DF[h.d])*mu(stk()));
+S.log[k]=S.log[k]||{};S.log[k][id]={m:mini?1:0,t:Date.now(),note:nt,pid,xp,mood:id=='mood'?MD:0};
+bonus(k);epic();chk();const l1=lv(tot());F=null;MD=0;sv();close();fx();snd([523,659,784]);S.vib&&navigator.vibrate&&navigator.vibrate(30);
+if(stp(l1)>stp(l0))rankUp(l1);else if(l1>l0)toast('⬆️ ¡Nivel '+l1+'!');else toast(old?'Prueba actualizada ✅':'+'+xp+' XP ✨');go(cur)}
+async function del(id){const e=S.log[DK][id];if(e.pid)await pd(e.pid);delete S.log[DK][id];bonus(DK);if(!Object.keys(S.log[DK]).length)delete S.log[DK];sv();close();go(cur)}
+function home(){const x=tot(),l=lv(x),a=th(l),b=th(l+1),d=S.log[dk()]||{},s=stk(),sd=Math.floor((new Date(dk()+'T12:00')-new Date(S.start+'T12:00'))/864e5)+1;
+return `<div class="c" style="display:flex;gap:14px;align-items:center"><div style="font-size:54px">${S.av}</div><div style="flex:1"><b style="font-size:20px">Nivel ${l}</b> · ${rk(l)}<div class="bar" style="margin:8px 0"><i style="width:${l>=100?100:(x-a)/(b-a)*100}%"></i></div><small>${x} XP${l<100?' · faltan '+(b-x):''}</small></div>${emb(l,64)}</div>
+<div class="row"><div class="c">🔥 ${s} días<br><small>x${mu(s)} XP · 🛡️ escudo semanal</small></div><div class="c">🪙 ${coins()}<br><small>monedas</small></div></div>
+<div class="c">${sd<1?'Tu temporada empieza en '+(1-sd)+' días 🌅':sd>30?'Temporada completada 🏆':'Temporada · día '+sd+' de 30'}<br>👑 Misión épica: ejercicio ${ep(wk(dk()))}/4 esta semana (+100 XP)</div>
+<h2>Misiones de hoy</h2>${act().map(h=>{const e=d[h.id];return `<button class="m ${e?'d':''}" onclick="mis('${h.id}')"><span>${h.i}</span><div style="flex:1"><b>${nm(h)}</b><small>${e?'✅ Hecha · +'+e.xp+' XP':DN[h.d]+' · '+DF[h.d]+' XP · '+h.h+' · pendiente'}</small></div></button>`}).join('')}
+<p style="color:var(--m);text-align:center">${act().every(h=>d[h.id])?'¡Día perfecto! +50 XP 🎉':'Mañana es un nuevo nivel. Hoy, un paso pequeño también cuenta 💛'}</p>`}
+const lastN=n=>[...Array(n)].map((_,i)=>ad(dk(),i-n+1)),dl=k=>'DLMMJVS'[new Date(k+'T12:00').getDay()];
+const bars=(v,lb)=>{const mx=Math.max(...v,1);return `<svg viewBox="0 0 ${v.length*30} 90" width="100%">${v.map((x,i)=>`<rect x="${i*30+4}" y="${70-x/mx*60}" width="22" height="${x/mx*60}" rx="5" fill="var(--a)"/><text x="${i*30+15}" y="84" font-size="9" text-anchor="middle" fill="#a79fd0">${lb[i]}</text>`).join('')}</svg>`};
+function prog(){const n=new Date(),y=n.getFullYear(),mo=n.getMonth(),f=(new Date(y,mo,1).getDay()+6)%7,dm=new Date(y,mo+1,0).getDate(),a=act();let c='<i></i>'.repeat(f);
+for(let d=1;d<=dm;d++){const e=S.log[dk(new Date(y,mo,d))]||{},r=a.length?a.filter(h=>e[h.id]).length/a.length:0;c+=`<div style="background:color-mix(in srgb,var(--a) ${Math.round(r*100)}%,#ffffff12);color:${r>.5?'#1a1230':'var(--t)'};border-radius:10px;padding:8px 0;text-align:center;font-size:13px">${d}</div>`}
+const w=lastN(7),wx=w.map(dayXp),md=lastN(14).map(k=>((S.log[k]||{}).mood||{}).mood||0),ms=md.filter(Boolean),ct={};w.forEach(k=>Object.keys(S.log[k]||{}).forEach(h=>h!='_b'&&(ct[h]=(ct[h]||0)+1)));
+const top=Object.keys(ct).sort((p,q)=>ct[q]-ct[p])[0],th0=top&&S.hab.find(h=>h.id==top),bd=w[wx.indexOf(Math.max(...wx))];
+return `<h2>Tu progreso</h2><div class="c"><b>${n.toLocaleDateString('es',{month:'long',year:'numeric'})}</b><div class="cal" style="margin-top:8px">${c}</div></div>
+<div class="c"><b>XP de los últimos 7 días</b>${bars(wx,w.map(dl))}</div><div class="c"><b>Mi ánimo (14 días)</b>${bars(md,lastN(14).map(dl))}</div>
+<div class="c"><b>Resumen semanal</b><br>⚡ ${wx.reduce((p,q)=>p+q,0)} XP ganados<br>${th0?'🏆 Hábito más cumplido: '+th0.n+'<br>':''}${ms.length?'🙂 Ánimo promedio: '+(ms.reduce((p,q)=>p+q,0)/ms.length).toFixed(1)+'/5<br>':''}${Math.max(...wx)>0?'⭐ Mejor día: '+new Date(bd+'T12:00').toLocaleDateString('es',{weekday:'long'})+'<br>':''}<small>${wx.some(x=>x)?'Cada paso suma. Estás construyendo algo bonito.':'Esta semana es una página en blanco: empieza con algo pequeño 💛'}</small></div>`}
+let GF='';const thumbs=()=>document.querySelectorAll('img[data-p]').forEach(i=>pg(i.dataset.p).then(u=>i.src=u));
+function gal(){let b=`<h2>Línea de tiempo de mi progreso</h2><select onchange="GF=this.value;go(2)"><option value="">Todos los hábitos</option>${S.hab.map(h=>`<option value="${h.id}" ${GF==h.id?'selected':''}>${esc(h.n)}</option>`).join('')}</select>`;
+Object.keys(S.log).sort().reverse().forEach(k=>{const es=Object.keys(S.log[k]).filter(h=>h!='_b'&&(!GF||h==GF));if(!es.length)return;
+b+=`<h3>${new Date(k+'T12:00').toLocaleDateString('es',{weekday:'long',day:'numeric',month:'short'})}</h3><div class="gr">${es.map(h=>{const e=S.log[k][h],hb=S.hab.find(x=>x.id==h)||{i:'❓'};return `<div onclick="mis('${h}','${k}')">${e.pid?`<img class="p" data-p="${e.pid}">`:`<div style="font-size:30px">${e.mood?EM[e.mood-1]:'📝'}</div>`}${hb.i} ${new Date(e.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</div>`}).join('')}</div>`});
+return b.includes('class="gr"')?b:b+'<p style="color:var(--m)">Aquí aparecerán tus pruebas. Tu primera foto o nota será el inicio de la historia 📸</p>'}
+const logr=()=>`<h2>Logros · ${S.ach.length}/${ACH.length}</h2><div class="gr">${ACH.map(a=>`<div class="${S.ach.includes(a[0])?'':'q'}"><div style="font-size:30px">${IC[a[1]]}</div>${a[0]}</div>`).join('')}</div>`;
+const SH=[['🦊','av',0],['🐼','av',40],['🦁','av',80],['🐙','av',120],['🦄','av',200],['🐲','av',300],['Amanecer','th',0],['Bosque','th',60],['Océano','th',60],['Rosa','th',60],['Confeti','fx',150]],
+TH=[['#ffb347','#14102b','#241c4a'],['#8be28b','#0f2018','#1b3a2a'],['#5ec8ff','#0c1c33','#16345a'],['#ff7eb6','#2a1020','#46203a']];
+function applyTh(){const t=TH[S.th],r=document.documentElement.style;r.setProperty('--a',t[0]);r.setProperty('--b',t[1]);r.setProperty('--s',t[2])}
+function buy(i){const p=SH[i];if(!S.own.includes(p[0])){if(coins()<p[2])return toast('Te faltan '+(p[2]-coins())+' monedas 🪙');S.sp+=p[2];S.own.push(p[0])}
+if(p[1]=='av')S.av=p[0];else if(p[1]=='th')S.th=i-6;else S.fx=S.fx?0:1;sv();applyTh();go(4)}
+const shop=()=>`<h2>Tienda · 🪙 ${coins()}</h2><div class="gr">${SH.map((p,i)=>`<div onclick="buy(${i})" style="${S.av==p[0]||(p[1]=='th'&&S.th==i-6)||(p[1]=='fx'&&S.fx)?'outline:2px solid var(--a)':''}"><div style="font-size:${p[1]=='av'?34:16}px;padding:8px 0">${p[1]=='th'?'🎨 ':p[1]=='fx'?'🎉 ':''}${p[0]}</div>${S.own.includes(p[0])?'Tuyo':'🪙 '+p[2]}</div>`).join('')}</div>`;
+function eh(i,f,v){S.hab[i][f]=v;sv()}
+function set(){return `<h2>Ajustes</h2><div class="c">Inicio de la temporada<input type="date" value="${S.start}" onchange="S.start=this.value;sv()"></div>
+<div class="c"><label class="row"><span>Sonido</span><input type="checkbox" style="flex:0 0 28px" ${S.snd?'checked':''} onchange="S.snd=this.checked?1:0;sv()"></label><label class="row"><span>Vibración</span><input type="checkbox" style="flex:0 0 28px" ${S.vib?'checked':''} onchange="S.vib=this.checked?1:0;sv()"></label><label>Tema<select onchange="S.th=+this.value;sv();applyTh();go(5)">${['Amanecer','Bosque','Océano','Rosa'].map((t,i)=>`<option value="${i}" ${S.th==i?'selected':''}>${t}</option>`).join('')}</select></label></div>
+<h3>Mis misiones</h3>${S.hab.map((h,i)=>`<div class="c"><div class="row"><input type="checkbox" style="flex:0 0 28px" ${h.on?'checked':''} onchange="eh(${i},'on',this.checked?1:0)"><input value="${esc(h.n)}" onchange="eh(${i},'n',this.value)"><select style="flex:0 0 100px" onchange="eh(${i},'d',this.value)">${Object.keys(DN).map(d=>`<option value="${d}" ${h.d==d?'selected':''}>${DN[d]}</option>`).join('')}</select></div><input placeholder="Versión mini (opcional)" value="${esc(h.mn)}" onchange="eh(${i},'mn',this.value)"></div>`).join('')}
+<button class="btn g" onclick="S.hab.push({id:'c'+Date.now(),n:'Nueva misión',i:'⭐',d:'f',x:'Misión personalizada',mn:'',h:'Cuando quieras',on:1});sv();go(5)">+ Agregar misión</button>
+<button class="btn g" onclick="ex()">Exportar datos (JSON)</button><label class="btn g">Importar datos<input type="file" accept=".json" hidden onchange="im(this.files[0])"></label>
+<button class="btn g" onclick="confirm('¿Borrar TODO tu progreso?')&&confirm('Última confirmación: no se puede deshacer.')&&ix('readwrite',s=>s.clear()).then(()=>{localStorage.clear();location.reload()})">Borrar todo</button>`}
+async function ex(){const ks=await ix('readonly',s=>s.getAllKeys()),vs=await ix('readonly',s=>s.getAll()),p={};ks.forEach((k,i)=>p[k]=vs[i]);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({S,p})],{type:'application/json'}));a.download='amanecer-'+dk()+'.json';a.click()}
+async function im(f){try{const j=JSON.parse(await f.text());S=j.S;sv();for(const k in j.p)await pp(k,j.p[k]);applyTh();go(5);toast('Datos importados ✅')}catch(e){toast('Archivo no válido')}}
+const V=[['Inicio','🏠',home],['Progreso','📈',prog],['Galería','🖼️',gal],['Logros','🏅',logr],['Tienda','🛍️',shop],['Ajustes','⚙️',set]];
+function go(i){const ch=i!=cur;cur=i;$('#v').innerHTML=V[i][2]();$('#n').innerHTML=V.map((v,j)=>`<button class="${j==i?'on':''}" onclick="go(${j})"><b>${v[1]}</b>${v[0]}</button>`).join('');ch&&scrollTo(0,0);i==2&&thumbs()}
+(()=>{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#ff9a5a');g.addColorStop(1,'#241c4a');x.fillStyle=g;x.fillRect(0,0,180,180);x.font='110px serif';x.textAlign='center';x.fillText('🌅',90,125);const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL();document.head.append(l)})();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+applyTh();go(0);
+</script></body></html>
